@@ -23,12 +23,13 @@
         imgEl.setAttribute('src', imageInfo.src);
       }
       else if (imageInfo.data != null) {
-        // @todo: Add this functionality.
+        imgEl.setAttribute('src', imageInfo.data);
       }
       else {
         return;
       }
 
+      imgEl.addEventListener('click', updateImage);
       imageWrapper.innerHTML = "";
       imageWrapper.appendChild(imgEl);
     }
