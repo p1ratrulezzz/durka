@@ -7,3 +7,6 @@
 *.iml
 out
 gen
+server/config.inc
+/server/vendor/
+/server/Config/config.inc

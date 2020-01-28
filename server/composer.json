@@ -1,0 +1,6 @@
+{
+    "require": {
+        "byjg/cache-engine": "^4.0",
+        "guzzlehttp/guzzle": "^6.5"
+    }
+}
