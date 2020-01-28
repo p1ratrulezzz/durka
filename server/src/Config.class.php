@@ -4,14 +4,14 @@ namespace Configuration;
 
 class Config {
   protected static $data = [];
-  protected static $cache_prefix = __FILE__;
+  protected static $cache_prefix = 'durka';
 
   public static function getVkServiceToken() {
     return static::get('vk_service_token');
   }
 
   public static function getCacheKey($key) {
-    return hash('adler32', static::$cache_prefix) . ':' . $key;
+    return hash('adler32', static::$cache_prefix) . '_' . $key;
   }
 
   public static function getVkApiVersion() {
