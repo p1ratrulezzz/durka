@@ -1,6 +1,6 @@
 (function() {
   // loadJsonFile('/data/images.json', init);
-  loadJsonFile('http://cdn.durka.plez.me/images.php', init);
+  loadJsonFile('https://cdn.durka.plez.me/images.php', init);
 
   /**
    * Main entrypoint.
