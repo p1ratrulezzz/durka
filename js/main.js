@@ -11,7 +11,7 @@
    */
   function init(data) {
     let imageWrapper = document.getElementById('image-wrapper');
-    let images = data.images;
+    let images = [];
 
     /**
      *
