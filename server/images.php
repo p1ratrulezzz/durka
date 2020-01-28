@@ -12,7 +12,7 @@ $pool = new CachePool(new ShmopCacheEngine());
 $cache_key = Config::getCacheKey('images');
 $cache_item = $pool->getItem($cache_key);
 
-if (!$cache_item->isHit()) {
+if (!$cache_item->isHit() && !empty($_GET['cc'])) {
   $client = new Client();
   $options = [];
   $options['query'] = [
