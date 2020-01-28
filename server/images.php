@@ -6,6 +6,7 @@ use Configuration\Config;
 use GuzzleHttp\Client;
 
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'autoload.php';
+ob_start();
 
 $pool = new CachePool(new ShmopCacheEngine());
 
@@ -34,13 +35,18 @@ if (!$cache_item->isHit() || !empty($_GET['cc'])) {
     if (!empty($response->response)) {
       $data = [];
       foreach ($response->response->items as $item) {
-        if ($item->is_pinned || $item->post_type != 'post' || empty($item->attachments) || !empty($item->text)) {
+        if (!empty($item->is_pinned) || $item->post_type != 'post' || empty($item->attachments) || !empty($item->text)) {
           continue;
         }
 
         foreach ($item->attachments as $attachment) {
           if ($attachment->type == 'photo') {
-            $data[] = ((array) array_pop($attachment->photo->sizes)) + ['source' => 'vk'];
+            $meta = [
+              'source' => 'vk',
+              'id' => hash('adler32', $item->id . $attachment->photo->id),
+            ];
+
+            $data[] = ((array) array_pop($attachment->photo->sizes)) + $meta;
           }
         }
       }
