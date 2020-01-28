@@ -37,31 +37,41 @@
     }
 
     function updateImage() {
-      if (images.length === 0) {
+      if (images.length < 5) {
         images = shuffleArray(data.images);
+        imageWrapper.innerHTML = "";
       }
 
-      let imageInfo = images.pop();
-      if (!imageInfo) {
-        return;
+      let imgEls = imageWrapper.getElementsByTagName('img');
+      let length = imgEls.length;
+      if (length > 0) {
+        imgEls[0].remove();
+        length--;
       }
 
-      let imgEl = document.createElement('img');
-      if (imageInfo.url != null) {
-        imgEl.setAttribute('src', imageInfo.url);
-      }
-      else if (imageInfo.data != null) {
-        imgEl.setAttribute('src', imageInfo.data);
-      }
-      else {
-        return;
+      for (let i=length; i < 5; i++) {
+        let imageInfo = images.pop();
+        if (!imageInfo) {
+          return;
+        }
+
+        let imgEl = document.createElement('img');
+        if (imageInfo.url != null) {
+          imgEl.setAttribute('src', imageInfo.url);
+        } else if (imageInfo.data != null) {
+          imgEl.setAttribute('src', imageInfo.data);
+        } else {
+          return;
+        }
+
+        imgEl.style.display = 'none';
+        imgEl.setAttribute('height', document.documentElement.clientHeight - 100);
+
+        imgEl.addEventListener('click', updateImage);
+        imageWrapper.appendChild(imgEl);
       }
 
-      imgEl.setAttribute('height', document.documentElement.clientHeight - 100);
-
-      imgEl.addEventListener('click', updateImage);
-      imageWrapper.innerHTML = "";
-      imageWrapper.appendChild(imgEl);
+      imageWrapper.getElementsByTagName('img')[0].style.display = null;
     }
 
     updateImage();
