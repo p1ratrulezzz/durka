@@ -1,6 +1,6 @@
 (function() {
-  loadJsonFile('/data/images.json', init);
-  // loadJsonFile('http://localhost:8084/images.php', init);
+  // loadJsonFile('/data/images.json', init);
+  loadJsonFile('http://cdn.durka.plez.me/images.php', init);
 
   /**
    * Main entrypoint.
@@ -30,7 +30,7 @@
         return;
       }
 
-      imgEl.setAttribute('height', document.documentElement.clientHeight);
+      imgEl.setAttribute('height', document.documentElement.clientHeight - 100);
 
       imgEl.addEventListener('click', updateImage);
       imageWrapper.innerHTML = "";
