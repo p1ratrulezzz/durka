@@ -1,5 +1,6 @@
 (function() {
   loadJsonFile('/data/images.json', init);
+  // loadJsonFile('http://localhost:8084/images.php', init);
 
   /**
    * Main entrypoint.
@@ -19,8 +20,8 @@
       }
 
       let imgEl = document.createElement('img');
-      if (imageInfo.src != null) {
-        imgEl.setAttribute('src', imageInfo.src);
+      if (imageInfo.url != null) {
+        imgEl.setAttribute('src', imageInfo.url);
       }
       else if (imageInfo.data != null) {
         imgEl.setAttribute('src', imageInfo.data);
@@ -28,6 +29,8 @@
       else {
         return;
       }
+
+      imgEl.setAttribute('height', document.documentElement.clientHeight);
 
       imgEl.addEventListener('click', updateImage);
       imageWrapper.innerHTML = "";

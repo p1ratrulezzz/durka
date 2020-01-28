@@ -60,6 +60,7 @@ $result['images'] = $cache_item->get();
 ob_clean();
 ob_start();
 $output = json_encode($result);
+header('Access-Control-Allow-Origin: *');
 header('Content-type: text/json; charset=UTF8');
 header('Content-size: ' . strlen($output));
 header('Cache-control: no-cache; must-revalidate; max-age=0');
