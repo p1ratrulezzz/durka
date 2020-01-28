@@ -65,7 +65,26 @@
         }
 
         imgEl.style.display = 'none';
-        imgEl.setAttribute('height', document.documentElement.clientHeight - 100);
+
+        let clientWidth = document.documentElement.clientWidth - 50;
+        let clientHeight = document.documentElement.clientHeight - 50;
+        if (imageInfo.width != null && imageInfo.height != null) {
+          /*
+           * width = height
+           * widthInBrowser = newheight
+           */
+          let widthInBrowser = Math.floor(clientHeight * imageInfo.width / imageInfo.height);
+
+          if (widthInBrowser < clientWidth) {
+            imgEl.setAttribute('width', widthInBrowser);
+          }
+          else {
+            imgEl.setAttribute('height', clientHeight);
+          }
+        }
+        else {
+          imgEl.setAttribute('height', clientHeight);
+        }
 
         imgEl.addEventListener('click', updateImage);
         imageWrapper.appendChild(imgEl);
