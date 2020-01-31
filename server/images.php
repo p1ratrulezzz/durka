@@ -42,7 +42,7 @@ function getFromVk($offset, $count, &$images) {
             ];
 
             $image = ((array) array_pop($attachment->photo->sizes)) + $meta;
-            if ($image['height'] < 50) {
+            if ($image['height'] < 100 || $image['width'] < 100) {
               continue;
             }
 
