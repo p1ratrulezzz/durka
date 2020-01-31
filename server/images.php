@@ -41,7 +41,12 @@ function getFromVk($offset, $count, &$images) {
               'id' => hash('adler32', $item->id . $attachment->photo->id),
             ];
 
-            $images[] = ((array) array_pop($attachment->photo->sizes)) + $meta;
+            $image = ((array) array_pop($attachment->photo->sizes)) + $meta;
+            if ($image['height'] < 50) {
+              continue;
+            }
+
+            $images[] = $image;
           }
         }
       }
