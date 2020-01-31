@@ -8,32 +8,27 @@ use GuzzleHttp\Client;
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'autoload.php';
 ob_start();
 
-$pool = new CachePool(new ShmopCacheEngine());
+define('PERPAGE_COUNT', 100);
 
-$cache_key = Config::getCacheKey('images');
-$cache_item = $pool->getItem($cache_key);
-
-if (!$cache_item->isHit() || !empty($_GET['cc'])) {
+function getFromVk($offset, $count, &$images) {
   $client = new Client();
   $options = [];
   $options['query'] = [
     'access_token' => Config::getVkServiceToken(),
     'v' => Config::getVkApiVersion(),
     'filter' => 'owner',
-    'count' => 100,
-    'offset' => 0,
+    'count' => $count,
+    'offset' => $offset,
     'owner_id' => Config::getVkWallId(),
   ];
-
-  $cache_item
-    ->set([])
-    ->expiresAfter(60);
 
   $response_object = $client->get('https://api.vk.com/method/wall.get', $options);
   if ($response_object->getStatusCode() == 200) {
     $response = json_decode($response_object->getBody());
     if (!empty($response->response)) {
       $data = [];
+      $data['count_all'] = $response->response->count;
+      $data['offset'] = $offset;
       foreach ($response->response->items as $item) {
         if (!empty($item->is_pinned) || $item->post_type != 'post' || empty($item->attachments) || !empty($item->text)) {
           continue;
@@ -46,22 +41,43 @@ if (!$cache_item->isHit() || !empty($_GET['cc'])) {
               'id' => hash('adler32', $item->id . $attachment->photo->id),
             ];
 
-            $data[] = ((array) array_pop($attachment->photo->sizes)) + $meta;
+            $images[] = ((array) array_pop($attachment->photo->sizes)) + $meta;
           }
         }
       }
 
-      $cache_item->set($data);
+      return $data;
     }
-
-    $cache_item->expiresAfter(30 * 60); // 30 minutes. @todo: To configs.
   }
 
+  return FALSE;
+}
+
+$pool = new CachePool(new ShmopCacheEngine());
+
+$cache_key = Config::getCacheKey('images');
+$cache_item = $pool->getItem($cache_key);
+
+if (!$cache_item->isHit() || !empty($_GET['cc'])) {
+  $cache = [
+    'count_all' => 0,
+    'offset' => 0,
+    'images' => [],
+  ];
+}
+else {
+  $cache = $cache_item->get();
+}
+
+// Check if there are possibly some new data.
+if (($cache['count_all'] == 0 || $cache['offset'] < $cache['count_all']) && ($cache_new = getFromVk($cache['offset'], PERPAGE_COUNT, $cache['images']))) {
+  $cache['offset'] += PERPAGE_COUNT;
+  $cache_item->set($cache);
   $pool->save($cache_item);
 }
 
 $result = [];
-$result['images'] = $cache_item->get();
+$result['images'] = $cache['images'];
 
 ob_clean();
 ob_start();
