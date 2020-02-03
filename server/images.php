@@ -36,17 +36,24 @@ function getFromVk($offset, $count, &$images) {
 
         foreach ($item->attachments as $attachment) {
           if ($attachment->type == 'photo') {
+            $id = hash('adler32', $item->id . $attachment->photo->id);
             $meta = [
               'source' => 'vk',
-              'id' => hash('adler32', $item->id . $attachment->photo->id),
+              'id' => $id,
             ];
 
+            if (isset($images[$id])) {
+              continue;
+            }
+
             $image = ((array) array_pop($attachment->photo->sizes)) + $meta;
+
+            // Filter images that are not memes.
             if ($image['height'] < 100 || $image['width'] < 100) {
               continue;
             }
 
-            $images[] = $image;
+            $images[$id] = $image;
           }
         }
       }
@@ -61,25 +68,47 @@ function getFromVk($offset, $count, &$images) {
 $pool = new CachePool(new ShmopCacheEngine());
 
 $cache_key = Config::getCacheKey('images');
-$cache_item = $pool->getItem($cache_key);
 
-if (!$cache_item->isHit() || !empty($_GET['cc'])) {
-  $cache = [
+$cache_item = $pool->getItem($cache_key);
+$cache_item->expiresAt(NULL);
+
+$cache_meta_item = $pool->getItem($cache_key . '_meta');
+$cache_meta_item->expiresAfter(30 * 60); // 30 Minutes
+
+if (!$cache_meta_item->isHit() || !empty($_GET['cc'])) {
+  $cache_meta_item->set([
     'count_all' => 0,
     'offset' => 0,
-    'images' => [],
-  ];
-}
-else {
-  $cache = $cache_item->get();
+  ]);
 }
 
-// Check if there are possibly some new data.
-if (($cache['count_all'] == 0 || $cache['offset'] < $cache['count_all']) && ($cache_new = getFromVk($cache['offset'], PERPAGE_COUNT, $cache['images']))) {
-  $cache['offset'] += PERPAGE_COUNT;
-  $cache_item->set($cache);
-  $pool->save($cache_item);
+$cache_meta = $cache_meta_item->get();
+if (!$cache_item->isHit() || !empty($_GET['cc'])) {
+  $cache_item->set([
+    'images' => [],
+  ]);
 }
+
+$cache = $cache_item->get();
+
+// Check if there are possibly some new data.
+if (($cache_meta['count_all'] == 0 || $cache_meta['offset'] < $cache_meta['count_all']) && ($cache_new = getFromVk($cache_meta['offset'], PERPAGE_COUNT, $cache['images']))) {
+  $cache_meta['offset'] += PERPAGE_COUNT;
+
+  if ($cache_meta['count_all'] != $cache_new['count_all'] || !empty($cache_meta['updating'])) {
+    $cache_meta['count_all'] = $cache_new['count_all'];
+    $cache_meta['updating'] = $cache_meta['offset'] < $cache_meta['count_all'];
+
+    $cache_item->set($cache);
+    $cache_meta_item->set($cache_meta);
+
+    $pool->saveDeferred($cache_item);
+    $pool->saveDeferred($cache_meta_item);
+  }
+
+}
+
+$pool->commit();
 
 $result = [];
 $result['images'] = $cache['images'];
