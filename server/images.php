@@ -111,7 +111,7 @@ if (($cache_meta['count_all'] == 0 || $cache_meta['offset'] < $cache_meta['count
 $pool->commit();
 
 $result = [];
-$result['images'] = $cache['images'];
+$result['images'] = array_values($cache['images']);
 
 ob_clean();
 ob_start();
