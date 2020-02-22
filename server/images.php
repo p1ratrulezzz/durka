@@ -145,6 +145,7 @@ switch ($action) {
       $image = $cache['images'][$key];
     }
 
+
     if (!empty($image['url'])) {
       header('Content-type: image/jpeg');
       $output = file_get_contents($image['url']);
@@ -153,6 +154,9 @@ switch ($action) {
       header('Content-type: image/jpeg');
       $output = base64_decode($image['data']);
     }
+
+    header('Vary: ETag');
+    header('ETag: W/"' . hash('adler32', serialize($image)) . '"');
     break;
 
   default:
@@ -167,7 +171,7 @@ $pool->commit();
 
 header('Access-Control-Allow-Origin: *');
 header('Content-size: ' . strlen($output));
-header('Cache-control: no-cache; must-revalidate; max-age=0');
+header('Cache-control: public; max-age=60');
 
 echo $output;
 ob_get_flush();
