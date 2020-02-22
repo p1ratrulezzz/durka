@@ -43,6 +43,9 @@
     }
 
     updateImage(false);
+
+    // Add random string to prevent caching.
+    history.pushState({}, null, location.href + '?' + randomString());
   }
 
   window.addEventListener("load", function(event) {
