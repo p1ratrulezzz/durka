@@ -110,14 +110,62 @@ if (($cache_meta['count_all'] == 0 || $cache_meta['offset'] < $cache_meta['count
 
 $pool->commit();
 
+$action = $_GET['action'] ?? 'getImages';
+
 $result = [];
-$result['images'] = array_values($cache['images']);
+$output = '';
 
 ob_clean();
 ob_start();
-$output = json_encode($result);
+
+switch ($action) {
+  case 'randomImage':
+    $session_id = $_GET['session_id'] ?? null;
+
+    $image = null;
+    if ($session_id) {
+      $session_cache = $pool->getItem($cache_key. '_' . $session_id);
+
+      $session_cache_data = $session_cache->get();
+      if (empty($session_cache_data)) {
+        $session_cache_data = $cache['images'];
+      }
+
+      $key = array_rand($session_cache_data);
+      $image = $session_cache_data[$key];
+      unset($session_cache_data[$key]);
+
+      $session_cache->set($session_cache_data);
+      $session_cache->expiresAfter(10 * 60); // 10 minutes.
+
+      $pool->saveDeferred($session_cache);
+    }
+    else {
+      $key = array_rand($cache['images']);
+      $image = $cache['images'][$key];
+    }
+
+    if (!empty($image['url'])) {
+      header('Content-type: image/jpeg');
+      $output = file_get_contents($image['url']);
+    }
+    elseif (!empty($image['data'])) {
+      header('Content-type: image/jpeg');
+      $output = base64_decode($image['data']);
+    }
+    break;
+
+  default:
+    $result['images'] = array_values($cache['images']);
+
+    header('Content-type: text/json; charset=UTF8');
+    $output = json_encode($result);
+    break;
+}
+
+$pool->commit();
+
 header('Access-Control-Allow-Origin: *');
-header('Content-type: text/json; charset=UTF8');
 header('Content-size: ' . strlen($output));
 header('Cache-control: no-cache; must-revalidate; max-age=0');
 
