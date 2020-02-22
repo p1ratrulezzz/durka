@@ -45,7 +45,7 @@
     updateImage(false);
 
     // Add random string to prevent caching.
-    history.pushState({}, null, location.href + '?' + randomString());
+    history.pushState({}, null, location.href.replace(/\?.*/i, '') + '?' + randomString());
   }
 
   window.addEventListener("load", function(event) {
