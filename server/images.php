@@ -94,7 +94,7 @@ if (!$cache_item->isHit() || !empty($_GET['cc'])) {
 $cache = $cache_item->get();
 
 // Check if there are possibly some new data.
-if (($cache_meta['count_all'] == 0 || $cache_meta['offset'] < $cache_meta['count_all']) && ($cache_new = getFromVk($cache_meta['offset'], PERPAGE_COUNT, $cache['images']))) {
+if (($cache_meta['count_all'] == 0 || $cache_meta['offset'] < $cache_meta['count_all']) && ($cache_new = getFromVk($cache_meta['offset'], PERPAGE_COUNT, $cache['images'], $wall_id))) {
   $cache_meta['offset'] += PERPAGE_COUNT;
 
   if ($cache_meta['count_all'] != $cache_new['count_all'] || !empty($cache_meta['updating'])) {
