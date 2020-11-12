@@ -65,7 +65,7 @@ function getFromVk($offset, $count, &$images, $wall_id) {
   return FALSE;
 }
 
-$wall_id = !empty($_GET['wall_id']) && is_number($_GET['wall_id']) ? intval($_GET['wall_id']) : Config::getVkWallId();
+$wall_id = !empty($_GET['wall_id']) && is_numeric($_GET['wall_id']) ? intval($_GET['wall_id']) : Config::getVkWallId();
 
 $pool = new CachePool(new ShmopCacheEngine());
 
