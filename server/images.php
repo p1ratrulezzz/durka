@@ -10,7 +10,7 @@ ob_start();
 
 define('PERPAGE_COUNT', 100);
 
-function getFromVk($offset, $count, &$images) {
+function getFromVk($offset, $count, &$images, $wall_id) {
   $client = new Client();
   $options = [];
   $options['query'] = [
@@ -19,7 +19,7 @@ function getFromVk($offset, $count, &$images) {
     'filter' => 'owner',
     'count' => $count,
     'offset' => $offset,
-    'owner_id' => Config::getVkWallId(),
+    'owner_id' => $wall_id,
   ];
 
   $response_object = $client->get('https://api.vk.com/method/wall.get', $options);
@@ -65,9 +65,11 @@ function getFromVk($offset, $count, &$images) {
   return FALSE;
 }
 
+$wall_id = !empty($_GET['wall_id']) && is_number($_GET['wall_id']) ? intval($_GET['wall_id']) : Config::getVkWallId();
+
 $pool = new CachePool(new ShmopCacheEngine());
 
-$cache_key = Config::getCacheKey('images');
+$cache_key = Config::getCacheKey('images:' . $wall_id);
 
 $cache_item = $pool->getItem($cache_key);
 $cache_item->expiresAt(NULL);
