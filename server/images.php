@@ -1,6 +1,6 @@
 <?php
 
-use ByJG\Cache\Psr16\ShmopCacheEngine;
+use ByJG\Cache\Psr16\FileSystemCacheEngine;
 use ByJG\Cache\Psr6\CachePool;
 use Configuration\Config;
 use GuzzleHttp\Client;
@@ -67,7 +67,7 @@ function getFromVk($offset, $count, &$images, $wall_id) {
 
 $wall_id = !empty($_GET['wall_id']) && is_numeric($_GET['wall_id']) ? intval($_GET['wall_id']) : Config::getVkWallId();
 
-$pool = new CachePool(new ShmopCacheEngine());
+$pool = new CachePool(new FileSystemCacheEngine('durka_cache_'));
 
 $cache_key = Config::getCacheKey('images:' . $wall_id);
 
