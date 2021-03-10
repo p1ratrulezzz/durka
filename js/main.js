@@ -6,6 +6,11 @@
     seed++;
     return (Math.random() + parseFloat('0.' + String(seed))).toString(36).substring(2, 15);
   }
+  
+  // Redirect http to https
+  if (window.location.protocol == 'http:') { 
+    window.location.href =  window.location.href.replace('http:', 'https:'); 
+  }
 
   /**
    * Main entrypoint.
